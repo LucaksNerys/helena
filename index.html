@@ -1,0 +1,486 @@
+<!DOCTYPE1 html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helenin Čarobni Kutak 💜🐱🌸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 50%, #d8b4fe 100%);
+      min-height: 100vh;
+      color: #581c87;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-fredoka {
+      font-family: 'Fredoka', cursive;
+    }
+    .floating-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-element {
+      position: absolute;
+      animation: float 8s infinite ease-in-out;
+      opacity: 0.6;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+    .card-purple {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 3px solid #c084fc;
+      box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.2);
+    }
+    .btn-purple {
+      background: linear-gradient(135deg, #a855f7, #7e22ce);
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+    }
+    .btn-purple:hover {
+      transform: translateY(-3deg) scale(1.03);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+    }
+    .memory-card {
+      aspect-ratio: 1;
+      perspective: 1000px;
+    }
+    .memory-card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .memory-card.flipped .memory-card-inner {
+      transform: rotateY(180deg);
+    }
+    .memory-card-front, .memory-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    .memory-card-front {
+      background: linear-gradient(135deg, #c084fc, #9333ea);
+      border: 2px solid #e9d5ff;
+    }
+    .memory-card-back {
+      background: #faf5ff;
+      border: 2px solid #a855f7;
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="relative pb-12">
+
+  <!-- Animacije u pozadini -->
+  <div class="floating-bg" id="bgContainer"></div>
+
+  <!-- Zaglavlje -->
+  <header class="relative z-10 text-center pt-8 pb-4 px-4">
+    <div class="inline-block animate-bounce mb-2">
+      <span class="text-5xl">👑🐱🌸</span>
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold text-purple-900 drop-shadow-md">
+      Helenin Čarobni Kutak
+    </h1>
+    <p class="text-lg md:text-xl text-purple-700 mt-2 font-semibold">
+      Dobrodošla u tvoj svijet pun cvijeća, mačića i srca! ✨💜
+    </p>
+  </header>
+
+  <!-- Glavni sadržaj -->
+  <main class="relative z-10 max-w-4xl mx-auto px-4 space-y-8 mt-6">
+
+    <!-- Poruka dobrodošlice -->
+    <section class="card-purple rounded-3xl p-6 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold text-purple-800 mb-3">
+        Bok, Helena! 💜
+      </h2>
+      <p class="text-purple-900 text-lg leading-relaxed">
+        Ovo mjesto je stvoreno kako bi ti uljepšalo dan! Istraži igre, posadi vlastiti čarobni vrt i otkrij slatke poruke spremne samo za tebe.
+      </p>
+      <div class="mt-4 flex flex-wrap justify-center gap-3">
+        <button onclick="generateCompliment()" class="btn-purple px-6 py-3 rounded-full font-bold text-lg flex items-center gap-2">
+          ✨ Generiraj Sladak Kompliment
+        </button>
+      </div>
+      <div id="complimentBox" class="hidden mt-4 p-4 bg-purple-100/80 rounded-2xl border-2 border-purple-300 text-purple-900 text-lg font-bold animate-fade-in">
+      </div>
+    </section>
+
+    <!-- Navigacija za igre -->
+    <div class="flex justify-center gap-2 md:gap-4 flex-wrap">
+      <button onclick="switchTab('game1')" id="tab-game1" class="btn-purple px-5 py-2.5 rounded-full font-bold">
+        🐱 Uhvati Cvijeće
+      </button>
+      <button onclick="switchTab('game2')" id="tab-game2" class="btn-purple px-5 py-2.5 rounded-full font-bold opacity-70">
+        🧩 Igra Pamćenja
+      </button>
+      <button onclick="switchTab('game3')" id="tab-game3" class="btn-purple px-5 py-2.5 rounded-full font-bold opacity-70">
+        🌷 Čarobni Vrt
+      </button>
+    </div>
+
+    <!-- IGRA 1: Uhvati cvijeće -->
+    <section id="game1" class="card-purple rounded-3xl p-6 text-center">
+      <h3 class="text-2xl font-bold text-purple-800 mb-2">Uhvati Cvijeće i Srca! 🌸💜</h3>
+      <p class="text-purple-700 mb-4 text-sm md:text-base">Pomakni mačića kako bi uhvatila cvijeće i srca! Izbjegavaj bodlje 🌵</p>
+      
+      <div class="flex justify-between items-center max-w-md mx-auto mb-3 px-4 font-bold text-purple-900">
+        <div>Bodovi: <span id="scoreDisplay" class="text-2xl text-purple-600">0</span></div>
+        <button onclick="toggleGame1()" id="startBtn1" class="btn-purple px-4 py-1.5 rounded-full text-sm">
+          Kreni! 🚀
+        </button>
+      </div>
+
+      <div class="relative w-full max-w-md h-80 mx-auto bg-purple-50/80 rounded-2xl border-2 border-purple-300 overflow-hidden touch-none" id="gameArea1">
+        <div id="basket" class="absolute bottom-2 left-1/2 -translate-x-1/2 text-4xl transition-all duration-75 select-none cursor-pointer">
+          🐱
+        </div>
+      </div>
+      
+      <!-- Kontrole za mobitel -->
+      <div class="flex justify-center gap-4 mt-3 md:hidden">
+        <button id="leftBtn" class="btn-purple px-6 py-2 rounded-xl text-xl">⬅️</button>
+        <button id="rightBtn" class="btn-purple px-6 py-2 rounded-xl text-xl">➡️</button>
+      </div>
+    </section>
+
+    <!-- IGRA 2: Igra pamćenja -->
+    <section id="game2" class="card-purple rounded-3xl p-6 text-center hidden">
+      <h3 class="text-2xl font-bold text-purple-800 mb-2">Igra Pamćenja s Mačićima 🐱✨</h3>
+      <p class="text-purple-700 mb-4 text-sm md:text-base">Pronađi sve parove slatkih mačića i cvijeća!</p>
+
+      <div class="flex justify-between items-center max-w-md mx-auto mb-4 px-4 font-bold text-purple-900">
+        <div>Potezi: <span id="movesDisplay" class="text-2xl text-purple-600">0</span></div>
+        <button onclick="resetMemoryGame()" class="btn-purple px-4 py-1.5 rounded-full text-sm">
+          Nova Igra 🔄
+        </button>
+      </div>
+
+      <div class="grid grid-cols-4 gap-3 max-w-md mx-auto" id="memoryGrid"></div>
+    </section>
+
+    <!-- IGRA 3: Interaktivni Čarobni Vrt -->
+    <section id="game3" class="card-purple rounded-3xl p-6 text-center hidden">
+      <h3 class="text-2xl font-bold text-purple-800 mb-2">Helenin Čarobni Vrt 🌷🐾</h3>
+      <p class="text-purple-700 mb-4 text-sm md:text-base">Klikni bilo gdje na travnjak kako bi posadila cvijeće, stvorila srca i pozvala mačiće!</p>
+
+      <div class="flex justify-center gap-2 mb-4">
+        <button onclick="setGardenItem('🌸')" class="p-2 bg-purple-100 rounded-xl border-2 border-purple-300 text-2xl hover:scale-110 transition">🌸</button>
+        <button onclick="setGardenItem('🌺')" class="p-2 bg-purple-100 rounded-xl border-2 border-purple-300 text-2xl hover:scale-110 transition">🌺</button>
+        <button onclick="setGardenItem('💜')" class="p-2 bg-purple-100 rounded-xl border-2 border-purple-300 text-2xl hover:scale-110 transition">💜</button>
+        <button onclick="setGardenItem('🐱')" class="p-2 bg-purple-100 rounded-xl border-2 border-purple-300 text-2xl hover:scale-110 transition">🐱</button>
+        <button onclick="setGardenItem('🦋')" class="p-2 bg-purple-100 rounded-xl border-2 border-purple-300 text-2xl hover:scale-110 transition">🦋</button>
+        <button onclick="clearGarden()" class="btn-purple px-3 py-1 rounded-xl text-xs flex items-center">Očisti 🧹</button>
+      </div>
+
+      <div id="gardenArea" class="relative w-full h-80 bg-gradient-to-b from-purple-100 to-purple-200 rounded-2xl border-2 border-purple-300 overflow-hidden cursor-pointer shadow-inner">
+        <div class="absolute bottom-2 right-3 text-xs text-purple-400 font-semibold pointer-events-none">
+          Dodirni da posadiš ✨
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center mt-12 text-purple-700 text-sm font-semibold">
+    Napravljeno s puno 💜, cvijeća 🌸 i mačića 🐱 za Helenu!
+  </footer>
+
+  <script>
+    // --- Pozadinske animacije ---
+    const bgContainer = document.getElementById('bgContainer');
+    const bgElements = ['🌸', '💜', '🐱', '✨', '🌺', '🐾', '🌷'];
+    
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div');
+      el.className = 'bg-element';
+      el.innerText = bgElements[Math.floor(Math.random() * bgElements.length)];
+      el.style.left = `${Math.random() * 100}%`;
+      el.style.top = `${Math.random() * 100}%`;
+      el.style.fontSize = `${Math.random() * 20 + 15}px`;
+      el.style.animationDelay = `${Math.random() * 5}s`;
+      bgContainer.appendChild(el);
+    }
+
+    // --- Zvučni Efekti (Tone.js) ---
+    const synth = new Tone.Synth({
+      oscillator: { type: "triangle" },
+      envelope: { attack: 0.005, decay: 0.1, sustain: 0.1, release: 0.1 }
+    }).toDestination();
+
+    function playSound(note = "C5") {
+      Tone.start();
+      synth.triggerAttackRelease(note, "8n");
+    }
+
+    // --- Generor Komplimenata na Croata ---
+    const compliments = [
+      "Helena, tvoj osmijeh osvjetljava i najtamniji dan! 🌟",
+      "Jedinstvena si, prekrasna i nevjerojatna baš takva kakva jesi! 💜",
+      "Neka tvoj dan bude ispunjen radošću, mačićima i puno cvijeća! 🌸",
+      "Ti si najslađa osoba na svijetu! 🐱✨",
+      "Svijet je puno ljepše mjesto jer si ti u njemu, Helena! 🌷",
+      "Šaljem ti veliki čarobni zagrljaj pun ljubavi! 💜🤗"
+    ];
+
+    function generateCompliment() {
+      playSound("E5");
+      const box = document.getElementById('complimentBox');
+      const randomText = compliments[Math.floor(Math.random() * compliments.length)];
+      box.innerText = randomText;
+      box.classList.remove('hidden');
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.4 } });
+    }
+
+    // --- Izmjena Tabova ---
+    function switchTab(tabId) {
+      playSound("G4");
+      ['game1', 'game2', 'game3'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+        document.getElementById('tab-' + id).classList.add('opacity-70');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById('tab-' + tabId).classList.remove('opacity-70');
+    }
+
+    // --- IGRA 1: Uhvati cvijeće ---
+    let game1Running = false;
+    let score1 = 0;
+    let basketPos = 50;
+    let gameInterval, itemInterval;
+    const basket = document.getElementById('basket');
+    const gameArea1 = document.getElementById('gameArea1');
+
+    function toggleGame1() {
+      if (game1Running) {
+        stopGame1();
+      } else {
+        startGame1();
+      }
+    }
+
+    function startGame1() {
+      score1 = 0;
+      document.getElementById('scoreDisplay').innerText = score1;
+      game1Running = true;
+      document.getElementById('startBtn1').innerText = "Zaustavi 🛑";
+      
+      // Pomicanje mišem/dodir
+      gameArea1.addEventListener('mousemove', moveBasketMouse);
+      gameArea1.addEventListener('touchmove', moveBasketTouch);
+
+      itemInterval = setInterval(spawnItem, 800);
+    }
+
+    function stopGame1() {
+      game1Running = false;
+      document.getElementById('startBtn1').innerText = "Kreni! 🚀";
+      clearInterval(itemInterval);
+      gameArea1.querySelectorAll('.falling-item').forEach(el => el.remove());
+    }
+
+    function moveBasketMouse(e) {
+      const rect = gameArea1.getBoundingClientRect();
+      let x = ((e.clientX - rect.left) / rect.width) * 100;
+      updateBasketPos(x);
+    }
+
+    function moveBasketTouch(e) {
+      if (!e.touches[0]) return;
+      const rect = gameArea1.getBoundingClientRect();
+      let x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+      updateBasketPos(x);
+    }
+
+    function updateBasketPos(x) {
+      basketPos = Math.max(5, Math.min(95, x));
+      basket.style.left = basketPos + '%';
+    }
+
+    document.getElementById('leftBtn').addEventListener('click', () => {
+      updateBasketPos(basketPos - 10);
+    });
+    document.getElementById('rightBtn').addEventListener('click', () => {
+      updateBasketPos(basketPos + 10);
+    });
+
+    function spawnItem() {
+      if (!game1Running) return;
+      const item = document.createElement('div');
+      const isBad = Math.random() < 0.2;
+      const items = isBad ? ['🌵', '🕷️'] : ['🌸', '💜', '🌺', '🌷', '✨'];
+      
+      item.className = 'falling-item absolute text-2xl select-none';
+      item.innerText = items[Math.floor(Math.random() * items.length)];
+      item.style.left = Math.random() * 90 + 5 + '%';
+      item.style.top = '0px';
+      gameArea1.appendChild(item);
+
+      let top = 0;
+      const fallSpeed = Math.random() * 2 + 2;
+
+      const fall = setInterval(() => {
+        if (!game1Running) {
+          clearInterval(fall);
+          item.remove();
+          return;
+        }
+        top += fallSpeed;
+        item.style.top = top + 'px';
+
+        // Detekcija sudara
+        if (top > 270 && top < 310) {
+          const itemLeft = parseFloat(item.style.left);
+          if (Math.abs(itemLeft - basketPos) < 12) {
+            clearInterval(fall);
+            item.remove();
+            if (isBad) {
+              score1 = Math.max(0, score1 - 5);
+              playSound("C3");
+            } else {
+              score1 += 10;
+              playSound("C6");
+            }
+            document.getElementById('scoreDisplay').innerText = score1;
+          }
+        }
+
+        if (top > 320) {
+          clearInterval(fall);
+          item.remove();
+        }
+      }, 20);
+    }
+
+    // --- IGRA 2: Igra pamćenja ---
+    const memoryIcons = ['🐱', '🌸', '💜', '🌺', '🦋', '🌷'];
+    let memoryCards = [...memoryIcons, ...memoryIcons];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let moves = 0;
+
+    function resetMemoryGame() {
+      const grid = document.getElementById('memoryGrid');
+      grid.innerHTML = '';
+      flippedCards = [];
+      matchedPairs = 0;
+      moves = 0;
+      document.getElementById('movesDisplay').innerText = moves;
+
+      // Miješanje karata
+      memoryCards.sort(() => Math.random() - 0.5);
+
+      memoryCards.forEach((icon, index) => {
+        const card = document.createElement('div');
+        card.className = 'memory-card';
+        card.innerHTML = `
+          <div class="memory-card-inner" onclick="flipCard(this, '${icon}')">
+            <div class="memory-card-front">🐾</div>
+            <div class="memory-card-back">${icon}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function flipCard(cardInner, icon) {
+      const card = cardInner.parentElement;
+      if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+
+      playSound("E4");
+      card.classList.add('flipped');
+      flippedCards.push({ card, icon });
+
+      if (flippedCards.length === 2) {
+        moves++;
+        document.getElementById('movesDisplay').innerText = moves;
+        checkMemoryMatch();
+      }
+    }
+
+    function checkMemoryMatch() {
+      const [card1, card2] = flippedCards;
+      if (card1.icon === card2.icon) {
+        playSound("G5");
+        matchedPairs++;
+        flippedCards = [];
+        if (matchedPairs === memoryIcons.length) {
+          setTimeout(() => {
+            confetti({ particleCount: 100, spread: 70 });
+            alert(`Čestitamo Helena! Pobijedila si u ${moves} poteza! 🎉💜`);
+          }, 500);
+        }
+      } else {
+        setTimeout(() => {
+          card1.card.classList.remove('flipped');
+          card2.card.classList.remove('flipped');
+          flippedCards = [];
+        }, 1000);
+      }
+    }
+
+    resetMemoryGame();
+
+    // --- IGRA 3: Čarobni Vrt ---
+    let currentGardenItem = '🌸';
+    const gardenArea = document.getElementById('gardenArea');
+
+    function setGardenItem(item) {
+      currentGardenItem = item;
+      playSound("A4");
+    }
+
+    gardenArea.addEventListener('click', (e) => {
+      const rect = gardenArea.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const element = document.createElement('div');
+      element.className = 'absolute text-3xl select-none transition-transform hover:scale-125';
+      element.innerText = currentGardenItem;
+      element.style.left = (x - 15) + 'px';
+      element.style.top = (y - 15) + 'px';
+
+      gardenArea.appendChild(element);
+      playSound("C5");
+
+      // Lagani efekt skakanja
+      element.animate([
+        { transform: 'scale(0) translateY(-20px)' },
+        { transform: 'scale(1.2) translateY(0px)' },
+        { transform: 'scale(1)' }
+      ], { duration: 300 });
+    });
+
+    function clearGarden() {
+      playSound("F3");
+      gardenArea.innerHTML = `
+        <div class="absolute bottom-2 right-3 text-xs text-purple-400 font-semibold pointer-events-none">
+          Dodirni da posadiš ✨
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
